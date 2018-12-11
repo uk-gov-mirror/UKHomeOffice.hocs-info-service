@@ -702,6 +702,93 @@
               ]
             }
           ]
+        },
+        {
+          "id": "abf7617c-058c-4287-9f41-b95384fdbc20",
+          "name": "99451747-d2bc-4a73-9c35-f567f60dd14f",
+          "path": "/UNIT2/99451747-d2bc-4a73-9c35-f567f60dd14f",
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {},
+          "subGroups": [
+            {
+              "id": "a6f5c195-b625-4a95-9789-6609ef87cb21",
+              "name": "CT4",
+              "path": "/UNIT2/99451747-d2bc-4a73-9c35-f567f60dd14f/CT4",
+              "attributes": {},
+              "realmRoles": [],
+              "clientRoles": {},
+              "subGroups": [
+                {
+                  "id": "a9faabdd-4e39-47c0-94ee-6548bf5b3522",
+                  "name": "WRITE",
+                  "path": "/UNIT2/99451747-d2bc-4a73-9c35-f567f60dd14f/CT4/WRITE",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
+                  "subGroups": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "abf7617c-058c-4287-9f41-b95384fdbc30",
+          "name": "53462f5b-0e78-4564-ab4d-759713fb3103",
+          "path": "/UNIT2/53462f5b-0e78-4564-ab4d-759713fb3103",
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {},
+          "subGroups": [
+            {
+              "id": "a6f5c195-b625-4a95-9789-6609ef87cb31",
+              "name": "CT5",
+              "path": "/UNIT2/53462f5b-0e78-4564-ab4d-759713fb3103/CT5",
+              "attributes": {},
+              "realmRoles": [],
+              "clientRoles": {},
+              "subGroups": [
+                {
+                  "id": "a9faabdd-4e39-47c0-94ee-6548bf5b3532",
+                  "name": "WRITE",
+                  "path": "/UNIT2/53462f5b-0e78-4564-ab4d-759713fb3103/CT5/WRITE",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
+                  "subGroups": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "abf7617c-058c-4287-9f41-b95384fdbc40",
+          "name": "1ca889fc-2d5b-4329-a2b2-0e81e636acd0",
+          "path": "/UNIT2/1ca889fc-2d5b-4329-a2b2-0e81e636acd0",
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {},
+          "subGroups": [
+            {
+              "id": "a6f5c195-b625-4a95-9789-6609ef87cb41",
+              "name": "CT6",
+              "path": "/UNIT2/1ca889fc-2d5b-4329-a2b2-0e81e636acd0/CT6",
+              "attributes": {},
+              "realmRoles": [],
+              "clientRoles": {},
+              "subGroups": [
+                {
+                  "id": "a9faabdd-4e39-47c0-94ee-6548bf5b3542",
+                  "name": "WRITE",
+                  "path": "/UNIT2/1ca889fc-2d5b-4329-a2b2-0e81e636acd0/CT6/WRITE",
+                  "attributes": {},
+                  "realmRoles": [],
+                  "clientRoles": {},
+                  "subGroups": []
+                }
+              ]
+            }
+          ]
         }
       ]
     }
@@ -742,9 +829,8 @@
       "account" : [ "view-profile", "manage-account" ]
     },
     "notBefore" : 0,
-    "groups" : [ "/UNIT2/434a4e33-437f-4e6d-8f04-14ea40fdbfa2", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843", "/UNIT2/434a4e33-437f-4e6d-8f04-14ea40fdbfa2/CT2/WRITE", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843/CT3/WRITE", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843/CT3/READ"]
+    "groups" : [ "/UNIT2/434a4e33-437f-4e6d-8f04-14ea40fdbfa2", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843", "/UNIT2/99451747-d2bc-4a73-9c35-f567f60dd14f",  "/UNIT2/53462f5b-0e78-4564-ab4d-759713fb3103", "/UNIT2/1ca889fc-2d5b-4329-a2b2-0e81e636acd0", "/UNIT2/434a4e33-437f-4e6d-8f04-14ea40fdbfa2/CT2/WRITE", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843/CT3/WRITE", "/UNIT2/8b3b4366-a37c-48b6-b274-4c50f8083843/CT3/READ", "/UNIT2/99451747-d2bc-4a73-9c35-f567f60dd14f/CT4/WRITE", "/UNIT2/53462f5b-0e78-4564-ab4d-759713fb3103/CT5/WRITE",  "/UNIT2/1ca889fc-2d5b-4329-a2b2-0e81e636acd0/CT6/WRITE"]
   },
-
     {
       "id" : "04167856-f772-4bca-87b9-f8b6739853b7",
       "createdTimestamp" : 1544174581362,

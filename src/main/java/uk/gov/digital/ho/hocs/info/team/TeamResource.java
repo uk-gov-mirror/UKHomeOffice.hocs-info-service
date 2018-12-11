@@ -74,6 +74,12 @@ public class TeamResource {
     public ResponseEntity<Set<TeamDto>> getActiveTeams() {
         return ResponseEntity.ok(teamService.getAllActiveTeams());
     }
+
+    @DeleteMapping(value = "/team")
+    public ResponseEntity<Set<TeamDto>> deleteInactiveTeamsFromKeycloak() {
+        return ResponseEntity.ok(teamService.deleteInactiveTeamsFromKeycloak());
+    }
+
 }
 
 

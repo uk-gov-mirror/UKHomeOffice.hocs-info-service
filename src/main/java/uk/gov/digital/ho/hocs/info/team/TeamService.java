@@ -3,6 +3,8 @@ package uk.gov.digital.ho.hocs.info.team;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.digital.ho.hocs.info.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.info.caseworkclient.dto.GetStagesResponse;
 import uk.gov.digital.ho.hocs.info.dto.PermissionDto;
 import uk.gov.digital.ho.hocs.info.dto.TeamDeleteActiveParentTopicsDto;
 import uk.gov.digital.ho.hocs.info.dto.TeamDto;
@@ -31,13 +33,15 @@ public class TeamService {
     private UnitRepository unitRepository;
     private CaseTypeRepository caseTypeRepository;
     private ParentTopicRepository parentTopicRepository;
+    private CaseworkClient caseworkClient;
 
-    public TeamService(TeamRepository teamRepository, UnitRepository unitRepository, CaseTypeRepository caseTypeRepository,ParentTopicRepository parentTopicRepository, KeycloakService keycloakService) {
+    public TeamService(TeamRepository teamRepository, UnitRepository unitRepository, CaseTypeRepository caseTypeRepository,ParentTopicRepository parentTopicRepository, KeycloakService keycloakService,CaseworkClient caseworkClient) {
         this.teamRepository = teamRepository;
         this.keycloakService = keycloakService;
         this.unitRepository = unitRepository;
         this.caseTypeRepository = caseTypeRepository;
         this.parentTopicRepository = parentTopicRepository;
+        this.caseworkClient = caseworkClient;
     }
 
     public Set<TeamDto> getTeamsForUnit(UUID unitUUID) {
@@ -187,5 +191,24 @@ public class TeamService {
 
         }
         return permissionPaths;
+    }
+
+    @Transactional
+    public Set<TeamDto> deleteInactiveTeamsFromKeycloak() {
+        Set<Team> inactiveTeams = teamRepository.findAllByActiveFalse();
+        Set<Team> deletedTeams = new HashSet<>();
+        inactiveTeams.forEach(inactiveTeam -> {
+            GetStagesResponse response = caseworkClient.getCasesForTeam(inactiveTeam.getUuid());
+            if (response.getStages().isEmpty()) {
+                //delete permissions
+                inactiveTeam.getPermissions().removeAll(inactiveTeam.getPermissions());
+                //delete from keycloak
+                keycloakService.deleteTeam(String.format("/%s/%s", inactiveTeam.getUnit().getShortCode(), inactiveTeam.getUuid().toString()));
+                deletedTeams.add(inactiveTeam);
+            }
+        });
+
+        return deletedTeams.stream().map(team -> TeamDto.fromWithoutPermissions(team)).collect(Collectors.toSet());
+
     }
 }

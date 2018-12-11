@@ -63,7 +63,18 @@ public class KeycloakService {
             keycloakClient.realm(hocsRealmName).groups().group(id).remove();
 
         } catch (Exception e) {
-            log.error("Failed to delete permission group for with path {} for reason: {}", path, e.getMessage(), value(EVENT, KEYCLOAK_FAILURE));
+            log.error("Failed to delete permission for group with path {} for reason: {}", path, e.getMessage(), value(EVENT, KEYCLOAK_FAILURE));
+            throw new KeycloakException(e.getMessage(), e);
+        }
+    }
+
+    public void deleteTeam(String path){
+        try {
+            String id = keycloakClient.realm(hocsRealmName).getGroupByPath(path).getId();
+            keycloakClient.realm(hocsRealmName).groups().group(id).remove();
+
+        } catch (Exception e) {
+            log.error("Failed to delete team with path {} for reason: {}", path, e.getMessage(), value(EVENT, KEYCLOAK_FAILURE));
             throw new KeycloakException(e.getMessage(), e);
         }
     }

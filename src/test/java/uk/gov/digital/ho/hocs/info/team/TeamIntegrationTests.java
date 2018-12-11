@@ -1,5 +1,6 @@
 package uk.gov.digital.ho.hocs.info.team;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.entity.ContentType;
 import org.junit.Before;
@@ -20,23 +21,38 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.digital.ho.hocs.info.dto.*;
+import org.springframework.web.client.RestTemplate;
+import uk.gov.digital.ho.hocs.info.caseworkclient.CaseworkClient;
+import uk.gov.digital.ho.hocs.info.caseworkclient.dto.GetStagesResponse;
+import uk.gov.digital.ho.hocs.info.caseworkclient.dto.StageDto;
+import uk.gov.digital.ho.hocs.info.dto.PermissionDto;
+import uk.gov.digital.ho.hocs.info.dto.TeamDto;
+import uk.gov.digital.ho.hocs.info.dto.UpdateTeamNameRequest;
+import uk.gov.digital.ho.hocs.info.dto.UpdateTeamPermissionsRequest;
 import uk.gov.digital.ho.hocs.info.repositories.TeamRepository;
 import uk.gov.digital.ho.hocs.info.security.AccessLevel;
 import uk.gov.digital.ho.hocs.info.security.KeycloakService;
+
 import javax.ws.rs.NotFoundException;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.ISOLATED;
-
+import static org.springframework.test.web.client.MockRestServiceServer.bindTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,7 +62,9 @@ import static org.springframework.test.context.jdbc.SqlConfig.TransactionMode.IS
 @ActiveProfiles("test")
 public class TeamIntegrationTests {
 
-    TestRestTemplate restTemplate = new TestRestTemplate();
+    private MockRestServiceServer caseworkMockService;
+
+    TestRestTemplate testRestTemplate = new TestRestTemplate();
 
     @Autowired
     TeamRepository teamRepository;
@@ -54,6 +72,11 @@ public class TeamIntegrationTests {
     @Autowired
     KeycloakService keycloakService;
 
+    @Autowired
+    CaseworkClient caseworkClient;
+
+    @Autowired
+    private RestTemplate caseworkRestTemplate;
 
     Keycloak keycloakClient;
 
@@ -85,6 +108,13 @@ public class TeamIntegrationTests {
         keycloakClient = Keycloak.getInstance(
                 serverUrl, "master", username, password, clientId, clientId);
         setupKeycloakRealm();
+        caseworkMockService = buildMockService(caseworkRestTemplate);
+    }
+
+    private MockRestServiceServer buildMockService(RestTemplate restTemplate) {
+        MockRestServiceServer.MockRestServiceServerBuilder caseworkBuilder = bindTo(restTemplate);
+        caseworkBuilder.ignoreExpectOrder(true);
+        return caseworkBuilder.build();
     }
 
     @Test
@@ -101,7 +131,7 @@ public class TeamIntegrationTests {
         assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
                 .getGroupByPath("/UNIT3/" + teamUUID + "/CT2/WRITE")).isInstanceOf(NotFoundException.class);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/unit/" + newUnitUUID + "/teams/" + teamUUID
                 , HttpMethod.POST, httpEntity, String.class);
 
@@ -122,12 +152,12 @@ public class TeamIntegrationTests {
     @Test
     public void shouldGetAllTeams() {
         HttpEntity httpEntity = new HttpEntity(headers);
-        ResponseEntity<Set<TeamDto>> result = restTemplate.exchange(
+        ResponseEntity<Set<TeamDto>> result = testRestTemplate.exchange(
                 getBasePath() + "/unit/" + unitUUID.toString() + "/teams"
                 , HttpMethod.GET, httpEntity, new ParameterizedTypeReference<Set<TeamDto>>() {
                 });
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(result.getBody().size()).isEqualTo(6);
+        assertThat(result.getBody().size()).isEqualTo(9);
     }
 
     @Test
@@ -140,7 +170,7 @@ public class TeamIntegrationTests {
 
         HttpEntity<TeamDto> httpEntity = new HttpEntity<>(team, headers);
 
-        ResponseEntity<TeamDto> result = restTemplate.exchange(
+        ResponseEntity<TeamDto> result = testRestTemplate.exchange(
                 getBasePath() + "/unit/" + unitUUID.toString() + "/teams"
                 , HttpMethod.POST, httpEntity, TeamDto.class);
 
@@ -158,7 +188,7 @@ public class TeamIntegrationTests {
         String teamId = "08612f06-bae2-4d2f-90d2-2254a68414b8";
         HttpEntity httpEntity = new HttpEntity(headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/users/" + userId + "/team/" + teamId
                 , HttpMethod.POST, httpEntity, String.class);
 
@@ -172,7 +202,7 @@ public class TeamIntegrationTests {
                 .anyMatch(g -> g.getId().equals(group.getId()))).isTrue();
 
         GroupRepresentation mainGroup = keycloakClient.realm(HOCS_REALM)
-                .getGroupByPath("/UNIT2/"+ teamId);
+                .getGroupByPath("/UNIT2/" + teamId);
         assertThat(keycloakClient.realm(HOCS_REALM)
                 .users().get(userId).groups().stream()
                 .anyMatch(g -> g.getId().equals(mainGroup.getId()))).isTrue();
@@ -189,7 +219,7 @@ public class TeamIntegrationTests {
 
         HttpEntity<UpdateTeamPermissionsRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId + "/permissions"
                 , HttpMethod.PUT, httpEntity, String.class);
 
@@ -213,7 +243,7 @@ public class TeamIntegrationTests {
 
         HttpEntity<UpdateTeamPermissionsRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId + "/permissions"
                 , HttpMethod.DELETE, httpEntity, String.class);
 
@@ -238,7 +268,7 @@ public class TeamIntegrationTests {
 
         HttpEntity<UpdateTeamPermissionsRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId + "/permissions"
                 , HttpMethod.DELETE, httpEntity, String.class);
 
@@ -267,7 +297,7 @@ public class TeamIntegrationTests {
 
         HttpEntity<UpdateTeamPermissionsRequest> httpEntity = new HttpEntity<>(request, headers);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId + "/permissions"
                 , HttpMethod.PUT, httpEntity, String.class);
 
@@ -288,7 +318,7 @@ public class TeamIntegrationTests {
         UpdateTeamNameRequest request = new UpdateTeamNameRequest("New Team Name");
         HttpEntity<UpdateTeamNameRequest> httpEntity = new HttpEntity(request);
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId
                 , HttpMethod.PUT, httpEntity, String.class);
 
@@ -298,11 +328,11 @@ public class TeamIntegrationTests {
 
     @Test
     public void shouldDeleteTeam() {
-        String teamId =  "5d584129-66ea-4e97-9277-7576ab1d32c0";
+        String teamId = "5d584129-66ea-4e97-9277-7576ab1d32c0";
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId
-                , HttpMethod.DELETE,new HttpEntity(null) ,String.class);
+                , HttpMethod.DELETE, new HttpEntity(null), String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(teamRepository.findByUuid(UUID.fromString(teamId)).isActive()).isFalse();
@@ -310,24 +340,122 @@ public class TeamIntegrationTests {
 
     @Test
     public void shouldReturnPreConditionFailedErrorWhenTryingToDeleteTeamWhichHasActiveParentTopicsAttached() {
-        String teamId =  "7c33c878-9404-4f67-9bbc-ca52dff285ca";
+        String teamId = "7c33c878-9404-4f67-9bbc-ca52dff285ca";
 
-        ResponseEntity<String> result = restTemplate.exchange(
+        ResponseEntity<String> result = testRestTemplate.exchange(
                 getBasePath() + "/team/" + teamId
-                , HttpMethod.DELETE,new HttpEntity(null) ,String.class);
+                , HttpMethod.DELETE, new HttpEntity(null), String.class);
 
         assertThat(result.getStatusCode()).isEqualTo(HttpStatus.PRECONDITION_FAILED);
         assertThat(teamRepository.findByUuid(UUID.fromString(teamId)).isActive()).isTrue();
     }
 
+    @Test
+    public void shouldDeleteThreeInactiveTeamsFromKeyCloakWhereNoCasesAssigned() {
+        String teamId1 = "99451747-d2bc-4a73-9c35-f567f60dd14f";
+        String teamId2 = "53462f5b-0e78-4564-ab4d-759713fb3103";
+        String teamId3 = "1ca889fc-2d5b-4329-a2b2-0e81e636acd0";
+
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/99451747-d2bc-4a73-9c35-f567f60dd14f/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess("{\"stages\": [] }", MediaType.APPLICATION_JSON));
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/53462f5b-0e78-4564-ab4d-759713fb3103/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess("{\"stages\": [] }", MediaType.APPLICATION_JSON));
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/1ca889fc-2d5b-4329-a2b2-0e81e636acd0/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess("{\"stages\": [] }", MediaType.APPLICATION_JSON));
+
+        GroupRepresentation Team1 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId1);
+        assertThat(Team1).isNotNull();
+        GroupRepresentation Team2 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId2);
+        assertThat(Team2).isNotNull();
+        GroupRepresentation Team3 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId3);
+        assertThat(Team3).isNotNull();
+
+        ResponseEntity<String> result = testRestTemplate.exchange(
+                getBasePath() + "/team"
+                , HttpMethod.DELETE, new HttpEntity(null), String.class);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId1)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId2)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId3)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    public void shouldOnlyDeleteTwoInactiveTeamsFromKeyCloakWhereNoCasesAssigned() throws JsonProcessingException {
+        String teamId1 = "99451747-d2bc-4a73-9c35-f567f60dd14f";
+        String teamId2 = "53462f5b-0e78-4564-ab4d-759713fb3103";
+        String teamId3 = "1ca889fc-2d5b-4329-a2b2-0e81e636acd0";
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/99451747-d2bc-4a73-9c35-f567f60dd14f/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess("{\"stages\": [] }", MediaType.APPLICATION_JSON));
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/53462f5b-0e78-4564-ab4d-759713fb3103/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess("{\"stages\": [] }", MediaType.APPLICATION_JSON));
+        caseworkMockService
+                .expect(requestTo("http://localhost:8082/team/1ca889fc-2d5b-4329-a2b2-0e81e636acd0/stage"))
+                .andExpect(method(GET))
+                .andRespond(withSuccess(buildTeamStagesResponse(), MediaType.APPLICATION_JSON));
+
+
+        GroupRepresentation Team1 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId1);
+        assertThat(Team1).isNotNull();
+        GroupRepresentation Team2 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId2);
+        assertThat(Team2).isNotNull();
+        GroupRepresentation Team3 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId3);
+        assertThat(Team3).isNotNull();
+
+        ResponseEntity<String> result = testRestTemplate.exchange(
+                getBasePath() + "/team"
+                , HttpMethod.DELETE, new HttpEntity(null), String.class);
+
+        caseworkMockService.verify();
+
+        assertThat(result.getStatusCode()).isEqualTo(OK);
+
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId1)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId2)).isInstanceOf(NotFoundException.class);
+        GroupRepresentation Team32 = keycloakClient.realm(HOCS_REALM)
+                .getGroupByPath("/UNIT2/" + teamId3);
+        assertThat(Team32).isNotNull();
+    }
+
+    private String buildTeamStagesResponse() throws JsonProcessingException {
+        Set<StageDto> stageDtoSet = new HashSet<>();
+        stageDtoSet.add(new StageDto(UUID.randomUUID()));
+        stageDtoSet.add(new StageDto(UUID.randomUUID()));
+        GetStagesResponse getStagesResponse = new GetStagesResponse(stageDtoSet);
+        return mapper.writeValueAsString(getStagesResponse);
+    }
 
     private String getBasePath() {
         return "http://localhost:" + port;
     }
 
     private void setupKeycloakRealm() throws IOException {
-     try {
-         keycloakClient.realms().realm(HOCS_REALM).remove();
+        try {
+            keycloakClient.realms().realm(HOCS_REALM).remove();
         } catch (Exception e) {
             //Realm does not exist
         }

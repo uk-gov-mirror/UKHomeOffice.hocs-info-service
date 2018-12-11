@@ -170,6 +170,19 @@ public class TeamResourceTest {
         verifyNoMoreInteractions(teamService);
     }
 
+    @Test
+    public void shouldDeleteInActiveTeamsWithNoCasesFromKeyCloak() {
+        Set<TeamDto> response = new HashSet<>();
+        response.add(new TeamDto("Team",UUID.randomUUID(),Boolean.TRUE));
+
+        when(teamService.deleteInactiveTeamsFromKeycloak()).thenReturn(response);
+        ResponseEntity result = teamResource.deleteInactiveTeamsFromKeycloak();
+        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(teamService, times(1)).deleteInactiveTeamsFromKeycloak();
+        verifyNoMoreInteractions(teamService);
+
+    }
+
     private Set<TeamDto> getTeams() {
         return new HashSet<TeamDto>() {{
             add(new TeamDto("Team1", UUID.randomUUID(), true, new HashSet<>()));
