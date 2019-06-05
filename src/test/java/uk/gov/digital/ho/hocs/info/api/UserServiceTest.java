@@ -6,10 +6,7 @@ import org.junit.runner.RunWith;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.digital.ho.hocs.info.api.dto.UserDto;
 import uk.gov.digital.ho.hocs.info.client.caseworkclient.CaseworkClient;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
-import uk.gov.digital.ho.hocs.info.domain.model.Unit;
 import uk.gov.digital.ho.hocs.info.security.KeycloakService;
 
 import java.util.*;

@@ -8,13 +8,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import uk.gov.digital.ho.hocs.info.api.TeamService;
 import uk.gov.digital.ho.hocs.info.application.RequestData;
-import uk.gov.digital.ho.hocs.info.domain.model.CaseType;
-import uk.gov.digital.ho.hocs.info.domain.model.Permission;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 

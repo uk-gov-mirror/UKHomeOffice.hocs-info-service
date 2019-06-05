@@ -6,7 +6,6 @@ import org.apache.camel.ProducerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.gov.digital.ho.hocs.info.api.dto.PermissionDto;
 import uk.gov.digital.ho.hocs.info.application.RequestData;
 import uk.gov.digital.ho.hocs.info.client.auditClient.dto.CreateAuditRequest;
 import uk.gov.digital.ho.hocs.info.client.auditClient.dto.EventType;

@@ -6,9 +6,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.digital.ho.hocs.info.api.UserResource;
-import uk.gov.digital.ho.hocs.info.api.UserService;
-import uk.gov.digital.ho.hocs.info.api.dto.UserDto;
 
 import java.util.ArrayList;
 import java.util.List;

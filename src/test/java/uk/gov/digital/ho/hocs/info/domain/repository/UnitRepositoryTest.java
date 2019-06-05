@@ -11,9 +11,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.digital.ho.hocs.info.domain.model.CaseType;
-import uk.gov.digital.ho.hocs.info.domain.model.Permission;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
-import uk.gov.digital.ho.hocs.info.domain.model.Unit;
 import uk.gov.digital.ho.hocs.info.security.AccessLevel;
 import javax.persistence.PersistenceException;
 

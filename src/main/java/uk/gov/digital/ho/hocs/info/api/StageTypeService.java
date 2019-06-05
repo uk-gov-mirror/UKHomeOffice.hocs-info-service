@@ -12,7 +12,6 @@ import uk.gov.digital.ho.hocs.info.domain.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.info.domain.model.Deadline;
 import uk.gov.digital.ho.hocs.info.domain.model.ExemptionDate;
 import uk.gov.digital.ho.hocs.info.domain.model.StageTypeEntity;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
 import uk.gov.digital.ho.hocs.info.domain.repository.HolidayDateRepository;
 import uk.gov.digital.ho.hocs.info.domain.repository.StageTypeRepository;
 

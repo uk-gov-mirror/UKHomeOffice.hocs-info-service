@@ -2,9 +2,6 @@ package uk.gov.digital.ho.hocs.info.api.dto;
 
 import org.junit.Test;
 import uk.gov.digital.ho.hocs.info.domain.model.CaseType;
-import uk.gov.digital.ho.hocs.info.domain.model.Permission;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
-import uk.gov.digital.ho.hocs.info.domain.model.Unit;
 import uk.gov.digital.ho.hocs.info.security.AccessLevel;
 
 import java.util.HashSet;

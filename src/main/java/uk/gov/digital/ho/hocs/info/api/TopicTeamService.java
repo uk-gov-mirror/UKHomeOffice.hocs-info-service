@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.digital.ho.hocs.info.api.dto.AddTeamToTopicDto;
 import uk.gov.digital.ho.hocs.info.client.auditClient.AuditClient;
 import uk.gov.digital.ho.hocs.info.domain.exception.ApplicationExceptions;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
 import uk.gov.digital.ho.hocs.info.domain.model.TopicTeam;
 import uk.gov.digital.ho.hocs.info.domain.repository.TopicTeamRepository;
 

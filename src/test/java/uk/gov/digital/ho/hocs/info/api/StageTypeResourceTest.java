@@ -7,9 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.digital.ho.hocs.info.api.dto.StageTypeDto;
-import uk.gov.digital.ho.hocs.info.api.dto.TeamDto;
 import uk.gov.digital.ho.hocs.info.domain.model.StageTypeEntity;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
 
 import java.util.HashSet;
 import java.util.Set;

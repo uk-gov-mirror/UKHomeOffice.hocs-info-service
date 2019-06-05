@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS case_type
   display_name     TEXT    NOT NULL,
   short_code       TEXT    NOT NULL,
   type             TEXT    NOT NULL,
-  owning_unit_uuid        UUID    NOT NULL,
+  owning_unit_uuid UUID    NOT NULL,
   deadline_stage   TEXT    NOT NULL,
   bulk             boolean NOT NULL DEFAULT TRUE,
   active           boolean NOT NULL DEFAULT TRUE,

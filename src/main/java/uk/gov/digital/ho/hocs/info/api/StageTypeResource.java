@@ -8,10 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.digital.ho.hocs.info.api.dto.StageTypeDto;
-import uk.gov.digital.ho.hocs.info.api.dto.TeamDto;
 import uk.gov.digital.ho.hocs.info.domain.exception.ApplicationExceptions;
 import uk.gov.digital.ho.hocs.info.domain.model.StageTypeEntity;
-import uk.gov.digital.ho.hocs.info.domain.model.Team;
 
 import java.time.LocalDate;
 import java.util.Set;
