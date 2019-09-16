@@ -7,9 +7,11 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.digital.ho.hocs.info.domain.exception.ApplicationExceptions;
+import uk.gov.digital.ho.hocs.info.domain.model.Constituency;
 import uk.gov.digital.ho.hocs.info.domain.model.House;
 import uk.gov.digital.ho.hocs.info.domain.model.HouseAddress;
 import uk.gov.digital.ho.hocs.info.domain.model.Member;
+import uk.gov.digital.ho.hocs.info.domain.repository.ConstituencyRepository;
 import uk.gov.digital.ho.hocs.info.domain.repository.HouseAddressRepository;
 
 import java.util.Arrays;
@@ -29,7 +31,9 @@ public class ListConsumerService {
     private final String API_NORTHERN_IRISH_ASSEMBLY;
     private final String API_EUROPEAN_PARLIAMENT;
     private final String API_WELSH_ASSEMBLY;
+    private final String API_UK_CONSTITUENCIES;
 
+    private ConstituencyRepository constituencyRepository;
     private HouseAddressRepository houseAddressRepository;
     private RestTemplate restTemplate;
 
@@ -39,15 +43,24 @@ public class ListConsumerService {
                                @Value("${api.ni.assembly}") String apiNorthernIrishAssembly,
                                @Value("${api.european.parliament}") String apiEuropeanParliament,
                                @Value("${api.welsh.assembly}") String apiWelshAssembly,
+                               ConstituencyRepository constituencyRepository,
                                HouseAddressRepository houseAddressRepository, RestTemplate restTemplate) {
         this.API_UK_PARLIAMENT = apiUkParliament;
         this.API_SCOTTISH_PARLIAMENT = apiScottishParliament;
         this.API_NORTHERN_IRISH_ASSEMBLY = apiNorthernIrishAssembly;
         this.API_EUROPEAN_PARLIAMENT = apiEuropeanParliament;
         this.API_WELSH_ASSEMBLY = apiWelshAssembly;
+        this.API_UK_CONSTITUENCIES = getFormattedUkEndpoint(HOUSE_COMMONS);
+        this.constituencyRepository = constituencyRepository;
         this.houseAddressRepository = houseAddressRepository;
         this.restTemplate = restTemplate;
+    }
 
+    public Set<Constituency> createUKConstituencyFromUKParliamentAPI() {
+        log.info("Updating constituencies");
+        UKConstituencys ukConstituencys = getMembersFromAPI(API_UK_CONSTITUENCIES, MediaType.APPLICATION_XML, UKConstituencys.class);
+        Set<Constituency> constituencys = ukConstituencys.getConstituencys().stream().map(c -> new Constituency(c.getConstituency())).collect(Collectors.toSet());
+        return constituencys;
     }
 
     public  Set<Member> createFromEuropeanParliamentAPI() {
@@ -78,7 +91,7 @@ public class ListConsumerService {
         log.info("Updating House of Commons");
         HouseAddress houseAddress = houseAddressRepository.findByHouseCode("HC");
         UKMembers ukUKMembers = getMembersFromAPI(getFormattedUkEndpoint(HOUSE_COMMONS), MediaType.APPLICATION_XML, UKMembers.class);
-        Set<Member> members = ukUKMembers.getMembers().stream().map(m -> new Member(House.HOUSE_COMMONS.getDisplayValue(),m.getFullTitle(), houseAddress.getUuid(),"CO"+m.getMemberId())).collect(Collectors.toSet());
+        Set<Member> members = ukUKMembers.getMembers().stream().map(m -> new Member(House.HOUSE_COMMONS.getDisplayValue(),m.getFullTitle(), houseAddress.getUuid(),"CO"+m.getMemberId(), constituencyRepository.findActiveConstituencyByName(m.getMemberFrom()).getUuid(), m.getMemberFrom())).collect(Collectors.toSet());
         return members;
     }
 

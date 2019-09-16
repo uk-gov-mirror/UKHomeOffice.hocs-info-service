@@ -8,15 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-class UKMember {
-
-    @JacksonXmlProperty(localName = "Member_Id")
-    private String memberId;
-
-    @JacksonXmlProperty(localName = "FullTitle")
-    private String fullTitle;
+class UKConstituency {
 
     @JacksonXmlProperty(localName = "MemberFrom")
-    private String memberFrom;
-
+    private String constituency;
 }
