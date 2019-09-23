@@ -8,7 +8,6 @@ import uk.gov.digital.ho.hocs.info.api.dto.UpdateTeamNameRequest;
 import uk.gov.digital.ho.hocs.info.api.dto.UpdateTeamPermissionsRequest;
 import uk.gov.digital.ho.hocs.info.domain.model.Team;
 
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -105,6 +104,18 @@ public class TeamResource {
     public ResponseEntity<Set<TeamDto>> getdraftingteams() {
         Set<Team> teams = teamService.getAllActiveTeams();
         return ResponseEntity.ok(teams.stream().map(TeamDto::fromWithoutPermissions).collect(Collectors.toSet()));
+    }
+
+    @GetMapping(value = "/team/case/{caseUUID}/stage/{stageUUID}/reassignments")
+    public ResponseEntity<Set<TeamDto>> getTeamsForReassignment(@PathVariable UUID caseUUID, @PathVariable UUID stageUUID) {
+        Set<Team> teams = teamService.getTeamsForReassignment(caseUUID, stageUUID);
+        return ResponseEntity.ok(teams.stream().map(TeamDto::fromWithoutPermissions).collect(Collectors.toSet()));
+    }
+
+    @GetMapping(value = "/team/case/{caseUUID}/stage/{stageUUID}/team/{teamUUID}/reassign")
+    public ResponseEntity getTeamForUnitAndStage(@PathVariable UUID caseUUID, @PathVariable UUID stageUUID) {
+        Set<Team> teams = teamService.getTeamsForReassignment(caseUUID, stageUUID);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/team/case/{caseUUID}/topic/{topicUUID}/stage/{stageType}")

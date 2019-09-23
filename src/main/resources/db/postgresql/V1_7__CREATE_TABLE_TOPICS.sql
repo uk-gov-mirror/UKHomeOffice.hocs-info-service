@@ -56,3 +56,4 @@ CREATE TABLE IF NOT EXISTS team_link
 CREATE INDEX idx_team_link_case_stage_link
   ON team_link (case_type, stage_type, link_uuid);
 
+                                                                          

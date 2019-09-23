@@ -120,6 +120,23 @@ public class TeamService {
         return team;
     }
 
+    public Set<Team> getTeamsForReassignment(UUID caseUUID, UUID stageUUID) {
+        final UUID stageTeamUUID = caseworkClient.getStageTeam(caseUUID, stageUUID);
+        if (stageTeamUUID == null) {
+            log.error("Could not find team UUID for reassignment with case {} and stage {}", caseUUID, stageUUID);
+        } else {
+            Team team = getTeam(stageTeamUUID);
+            if (team == null) {
+                log.error("Could not find team for reassignment with UUID {}", stageTeamUUID);
+            } else {
+                final Set<Team> teams = teamRepository.findTeamsByUnitUuid(team.getUnit().getUuid());
+                log.info("Got {} reassignment Teams", teams.size());
+                return teams;
+            }
+        }
+        return null;
+    }
+
     @Transactional
     public void updateTeamName(UUID teamUUID, String newName) {
         log.debug("Updating Team {} name", teamUUID);
