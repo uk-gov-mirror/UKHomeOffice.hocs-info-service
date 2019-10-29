@@ -29,9 +29,12 @@ public class GetStandardLineResponse {
     @JsonProperty("expires")
     private LocalDateTime expires;
 
-    public static GetStandardLineResponse from(StandardLine standardLine) {
+    @JsonProperty()
+    private String topicDisplayName;
+
+    public static GetStandardLineResponse from(StandardLine standardLine, String topicDisplayName) {
         return new GetStandardLineResponse(standardLine.getDisplayName(),
                 standardLine.getUuid(), standardLine.getDocumentUUID(),
-                standardLine.getTopicUUID(), standardLine.getExpires());
+                standardLine.getTopicUUID(), standardLine.getExpires(), topicDisplayName);
     }
 }
