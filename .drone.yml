@@ -94,22 +94,6 @@ pipeline:
       event: deployment
       environment: [cs-qa]
 
-  trigger_hocs_data_builds_with_build_number:
-    image: plugins/downstream
-    server: https://drone-gh.acp.homeoffice.gov.uk
-    fork: true
-    token: ${DRONE_TOKEN}
-    secrets:
-      - drone_token
-    params:
-      - "HOCS_INFO_SERVICE_DATA_VERSION=info-service-data-${DRONE_BUILD_NUMBER}"
-    repositories:
-      - UKHomeOffice/hocs-data
-      - UKHomeOffice/hocs-data-wcs
-    when:
-      branch: master
-      event: push
-
   trigger_hocs_data_wcs_build_with_semver_tag:
     image: plugins/downstream
     server: https://drone-gh.acp.homeoffice.gov.uk
@@ -133,11 +117,12 @@ pipeline:
       event: [push, tag, deployment]
 
   deploy-to-cs-dev-from-build-number:
+    group: deploy-to-dev
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
       - ENVIRONMENT=cs-dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
-      - HOCS_INFO_SERVICE_DATA_VERSION=info-service-data-${DRONE_BUILD_NUMBER}
+      - HOCS_INFO_SERVICE_DATA_VERSION=latest
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
       - hocs_info_service_dev_cs
@@ -149,11 +134,12 @@ pipeline:
       event: [push, tag]
 
   deploy-to-wcs-dev-from-build-number:
+    group: deploy-to-dev
     image: quay.io/ukhomeofficedigital/kd:v1.16.0
     environment:
       - ENVIRONMENT=wcs-dev
       - VERSION=build-${DRONE_BUILD_NUMBER}
-      - HOCS_INFO_SERVICE_DATA_VERSION=info-service-data-${DRONE_BUILD_NUMBER}
+      - HOCS_INFO_SERVICE_DATA_VERSION=latest
       - KUBE_SERVER=https://kube-api-notprod.notprod.acp.homeoffice.gov.uk
     secrets:
       - hocs_info_service_dev_wcs
