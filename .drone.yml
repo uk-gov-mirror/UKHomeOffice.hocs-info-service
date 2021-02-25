@@ -36,7 +36,6 @@ pipeline:
     commands:
       - docker build -t hocs-info-service .
     when:
-      branch: master
       event: [push, tag]
 
   install-docker-image:
@@ -52,9 +51,8 @@ pipeline:
       - export BRANCH_NAME_TAGFRIENDLY=`echo "$${DRONE_COMMIT_BRANCH}" | sed 's$/$_$g'`
       - docker tag hocs-info-service quay.io/ukhomeofficedigital/hocs-info-service:branch-$${BRANCH_NAME_TAGFRIENDLY}
       - docker push quay.io/ukhomeofficedigital/hocs-info-service:build-$${DRONE_BUILD_NUMBER}
-      - docker push quay.io/ukhomeofficedigital/hocs-info-service:branch-$${BRANCH_NAME_TAGFRIENDLY}
+      - docker push quay.io/ukhomeofficedigital/hocs-info-service:branch-$${BRANCH_NAME_TAGFRIENDLY} 
     when:
-      branch: [master, epic/*]
       event: [push]
 
   install-docker-image-latest:
