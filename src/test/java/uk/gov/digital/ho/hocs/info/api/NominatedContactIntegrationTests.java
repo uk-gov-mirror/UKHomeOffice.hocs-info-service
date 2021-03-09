@@ -121,23 +121,6 @@ public class NominatedContactIntegrationTests {
 
     }
 
-    @Test
-    public void shouldReturnErrorWhenTryingToDeleteTheOnlyNominatedContactFromATeam() {
-
-        String teamUUID =  "911adabe-5ab7-4470-8395-6b584a61462d";
-        String contactUUID = "8bc0e84d-08e0-42f2-9d75-ff7b7c40d9fa";
-
-        HttpEntity httpEntity = new HttpEntity(headers);
-
-        ResponseEntity result = restTemplate.exchange(
-                getBasePath() + "/team/" + teamUUID + "/contact/" + contactUUID
-                , HttpMethod.DELETE, httpEntity, String.class);
-
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(nominatedContactRepository.findByUuid(UUID.fromString(contactUUID))).isNotNull();
-
-    }
-
     private String getBasePath() {
         return "http://localhost:" + port;
     }
